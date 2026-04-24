@@ -48,13 +48,16 @@ export function middleware(request: NextRequest) {
       )
     }
 
-    const authToken = request.cookies.get('token')?.value
+    const authToken = request.cookies.get('token')?.value ||
+                      request.headers.get('Authorization')?.replace('Bearer ', '')
+
     if (PROTECTED_ROUTES.some(route => pathname.startsWith(route)) && !authToken) {
       return NextResponse.json(
         {
           error: {
             code: 'UNAUTHORIZED',
             message: 'Authentication required. Please login.',
+            hint: 'Login at POST /api/auth/login or provide Authorization: Bearer <token> header',
           },
         },
         { status: 401 }
