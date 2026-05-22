@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<!-- ==================================================================
+     LONG DOCUMENT · Bahasa Indonesia (EN template path)
+     Modul Pertemuan: Autentikasi di Web & API
+     ================================================================== -->
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Autentikasi di Web & API</title>
+<meta name="author" content="Tim Pengajar">
+<meta name="description" content="Modul pertemuan tentang autentikasi di web dan REST API: konsep, jenis, aturan, best practice keamanan, dan use case nyata.">
+<meta name="keywords" content="autentikasi, otorisasi, web security, REST API, JWT, OAuth">
+<meta name="generator" content="Kami">
+<style>
+  @font-face { font-family: "JetBrains Mono"; src: url("../fonts/JetBrainsMono.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+  @font-face { font-family: "JetBrains Mono"; src: url("../fonts/JetBrainsMono.woff2") format("woff2"); font-weight: 500; font-style: normal; }
+
+  @page {
+    size: A4;
+    margin: 20mm 22mm 22mm 22mm;
+    background: #f5f4ed;
+
+    @top-right {
+      content: string(section-title);
+      font-family: Charter, Georgia, Palatino, serif;
+      font-size: 8pt;
+      color: #6b6a64;
+    }
+
+    @bottom-center {
+      content: counter(page) "  ·  Autentikasi di Web & API";
+      font-family: Charter, Georgia, Palatino, serif;
+      font-size: 9pt;
+      color: #6b6a64;
+    }
+  }
+  @page:first {
+    @top-right { content: ""; }
+    @bottom-center { content: ""; }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --parchment: #f5f4ed;
+    --ivory:     #faf9f5;
+    --near-black:#141413;
+    --dark-warm: #3d3d3a;
+    --olive:     #504e49;
+    --stone:     #6b6a64;
+    --brand:     #1B365D;
+    --border:    #e8e6dc;
+    --border-soft:#e5e3d8;
+    --tag-bg:    #E4ECF5;
+
+    --serif: Charter, Georgia,
+             Palatino, "Times New Roman", serif;
+    --sans: var(--serif);
+    --mono:  "JetBrains Mono", "SF Mono", "Fira Code",
+             Consolas, Monaco, monospace;
+
+    --rhythm-module:  14pt;
+    --rhythm-section: 18pt;
+  }
+
+  html, body { background: var(--parchment); }
+
+  @media screen {
+    body { max-width: 210mm; margin: 0 auto; padding: 20mm 22mm 22mm 22mm; }
+  }
+
+  body {
+    color: var(--near-black);
+    font-family: var(--serif);
+    font-size: 10.5pt;
+    line-height: 1.55;
+    widows: 3;
+    orphans: 3;
+  }
+
+  .sans { font-family: var(--sans); }
+
+  .cover {
+    min-height: 240mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40mm 0 0 0;
+    break-after: page;
+  }
+  .cover-eyebrow {
+    font-family: var(--sans);
+    font-size: 10pt;
+    color: var(--brand);
+    letter-spacing: 2pt;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 18pt;
+  }
+  .cover-title {
+    font-size: 40pt;
+    font-weight: 500;
+    color: var(--near-black);
+    line-height: 1.12;
+    letter-spacing: -0.5pt;
+    margin-bottom: 16pt;
+  }
+  .cover-sub {
+    font-family: var(--sans);
+    font-size: 14pt;
+    color: var(--olive);
+    line-height: 1.45;
+    max-width: 85%;
+    margin-bottom: 30pt;
+  }
+  .cover-meta {
+    font-family: var(--sans);
+    font-size: 10pt;
+    color: var(--stone);
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+  }
+  .cover-meta strong { color: var(--dark-warm); font-weight: 500; }
+
+  .toc { break-after: page; }
+  .toc h2 {
+    font-size: 22pt;
+    font-weight: 500;
+    margin-bottom: var(--rhythm-module);
+    border-left: 2.5pt solid var(--brand);
+    border-radius: 1.5pt;
+    padding-left: 8pt;
+  }
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6pt 0;
+    border-bottom: 0.3pt dotted var(--border);
+    font-size: 11pt;
+  }
+  .toc-item:last-of-type { border-bottom: none; }
+  .toc-num {
+    color: var(--brand);
+    font-weight: 500;
+    min-width: 30pt;
+    font-variant-numeric: tabular-nums;
+  }
+  .toc-title {
+    flex: 1;
+    color: var(--near-black);
+    padding-left: 6pt;
+  }
+  .toc-page {
+    color: var(--stone);
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1 {
+    font-size: 24pt;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.3pt;
+    margin: 0 0 10pt 0;
+    border-left: 2.5pt solid var(--brand);
+    border-radius: 1.5pt;
+    padding-left: 8pt;
+    color: var(--near-black);
+    break-after: avoid;
+  }
+  h2 {
+    font-size: 16pt;
+    font-weight: 500;
+    line-height: 1.25;
+    margin: 24pt 0 8pt 0;
+    color: var(--near-black);
+    break-after: avoid;
+    string-set: section-title content();
+  }
+  h3 {
+    font-size: 13pt;
+    font-weight: 500;
+    line-height: 1.3;
+    margin: 18pt 0 6pt 0;
+    color: var(--dark-warm);
+    break-after: avoid;
+  }
+
+  .chapter-num {
+    font-family: var(--sans);
+    font-size: 10pt;
+    color: var(--brand);
+    letter-spacing: 1pt;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 6pt;
+  }
+
+  p { margin: 0 0 10pt 0; line-height: 1.55; color: var(--near-black); widows: 2; orphans: 2; }
+
+  .lead {
+    font-size: 12pt;
+    line-height: 1.55;
+    color: var(--dark-warm);
+    margin-bottom: var(--rhythm-module);
+  }
+
+  .hl { color: var(--brand); font-weight: 500; }
+  strong { font-weight: 500; }
+
+  ul, ol {
+    margin: 6pt 0 10pt 0;
+    padding-left: 20pt;
+    line-height: 1.55;
+  }
+  ul li::marker { color: var(--brand); }
+  ol li::marker { color: var(--brand); font-weight: 500; }
+  li { margin-bottom: 3pt; }
+
+  blockquote, .quote {
+    border-left: 2pt solid var(--brand);
+    margin: 12pt 0;
+    padding: 4pt 0 4pt 16pt;
+    color: var(--olive);
+    line-height: 1.55;
+    break-inside: avoid;
+  }
+  blockquote .cite, .quote .cite {
+    display: block;
+    font-family: var(--sans);
+    font-size: 9pt;
+    color: var(--stone);
+    margin-top: 4pt;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 9pt;
+    background: var(--ivory);
+    padding: 1pt 4pt;
+    border-radius: 2pt;
+    color: var(--dark-warm);
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 9pt;
+    line-height: 1.5;
+    background: var(--ivory);
+    border-radius: 4pt;
+    padding: 10pt 14pt;
+    margin: 10pt 0;
+    white-space: pre-wrap;
+    color: var(--near-black);
+    break-inside: avoid;
+  }
+  pre code { background: transparent; padding: 0; font-size: inherit; }
+
+  table, .kami-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin: 12pt 0;
+    break-inside: avoid;
+  }
+  table th, .kami-table th {
+    text-align: left;
+    font-family: var(--sans);
+    font-weight: 500;
+    color: var(--dark-warm);
+    padding: 6pt 8pt;
+    border-bottom: 1pt solid var(--border);
+    background: var(--ivory);
+  }
+  table td, .kami-table td {
+    padding: 5pt 8pt;
+    border-bottom: 0.3pt solid var(--border-soft);
+    vertical-align: top;
+  }
+  table.compact th, .kami-table.compact th { padding: 3pt 6pt; font-size: 8pt; }
+  table.compact td, .kami-table.compact td { padding: 2pt 6pt; font-size: 8pt; line-height: 1.4; }
+
+  .callout {
+    background: var(--ivory);
+    border-left: 2pt solid var(--brand);
+    padding: 10pt 14pt;
+    border-radius: 3pt;
+    margin: 12pt 0;
+    line-height: 1.55;
+    break-inside: avoid;
+  }
+  .takeaway {
+    background: var(--ivory);
+    border-radius: 4pt;
+    padding: 10pt 14pt;
+    margin: 14pt 0;
+    break-inside: avoid;
+  }
+  .takeaway-label {
+    font-family: var(--sans);
+    font-size: 9pt;
+    color: var(--brand);
+    letter-spacing: 1pt;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 4pt;
+  }
+
+  .tag {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--brand);
+    font-family: var(--sans);
+    font-size: 9pt;
+    font-weight: 500;
+    padding: 1pt 6pt;
+    border-radius: 3pt;
+    letter-spacing: 0.4pt;
+    text-transform: uppercase;
+    margin-right: 4pt;
+  }
+
+  .chapter { break-before: page; }
+
+  .illus {
+    margin: 18pt auto;
+    padding: 10pt 0 4pt 0;
+    text-align: center;
+    background: transparent;
+    break-inside: avoid;
+  }
+  .illus svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  .illus figcaption {
+    font-family: var(--sans);
+    font-size: 9pt;
+    color: var(--stone);
+    margin-top: 10pt;
+    font-style: italic;
+    text-align: center;
+    max-width: 460pt;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
+  }
+  .illus-label {
+    font-family: var(--sans);
+    font-size: 8pt;
+    color: var(--brand);
+    letter-spacing: 1.5pt;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 8pt;
+    text-align: center;
+  }
+
+  .use-case {
+    background: var(--ivory);
+    border-radius: 6pt;
+    padding: 12pt 16pt;
+    margin: 12pt 0;
+    border: 0.5pt solid var(--border);
+    break-inside: avoid;
+  }
+  .use-case h3 {
+    margin-top: 0;
+    color: var(--brand);
+  }
+  .use-case .meta {
+    font-family: var(--sans);
+    font-size: 9pt;
+    color: var(--stone);
+    margin-bottom: 6pt;
+    letter-spacing: 0.3pt;
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<section class="cover">
+  <div>
+    <div class="cover-eyebrow">Modul Pertemuan · Keamanan Aplikasi</div>
+    <div class="cover-title">Autentikasi di<br>Web &amp; API</div>
+    <div class="cover-sub">Dari konsep dasar hingga praktik nyata: memahami siapa yang berbicara dengan sistem kita, dan bagaimana menjaganya tetap aman.</div>
+  </div>
+  <div class="cover-meta">
+    <strong>Tim Pengajar</strong><br>
+    Versi 1.0 · 2026.05<br>
+    Program Studi Teknik Informatika
+  </div>
+</section>
+
+<!-- TOC -->
+<section class="toc">
+  <h2>Daftar Isi</h2>
+  <div class="toc-item"><span class="toc-num">01</span><span class="toc-title">Tujuan Pembelajaran &amp; Ringkasan</span><span class="toc-page">03</span></div>
+  <div class="toc-item"><span class="toc-num">02</span><span class="toc-title">5W1H — Mengapa Butuh Autentikasi</span><span class="toc-page">04</span></div>
+  <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">Jenis-Jenis Autentikasi di Web &amp; REST API</span><span class="toc-page">06</span></div>
+  <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">Aturan Umum Autentikasi &amp; Otorisasi</span><span class="toc-page">09</span></div>
+  <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">Security Tips &amp; Best Practice</span><span class="toc-page">11</span></div>
+  <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">Use Case Nyata per Tipe Autentikasi</span><span class="toc-page">13</span></div>
+  <div class="toc-item"><span class="toc-num">07</span><span class="toc-title">Lampiran — Glosarium &amp; Bacaan Lanjutan</span><span class="toc-page">16</span></div>
+</section>
+
+<!-- Chapter 01 -->
+<section class="chapter">
+  <div class="chapter-num">01 · Pengantar</div>
+  <h1>Tujuan Pembelajaran &amp; Ringkasan</h1>
+
+  <p class="lead">
+    Autentikasi adalah pintu masuk pertama setiap sistem yang punya nilai. Tanpa autentikasi yang benar, kita tidak bisa membedakan <span class="hl">pengguna sah</span> dari penyerang — semua mekanisme keamanan setelahnya runtuh.
+  </p>
+
+  <h2>Tujuan Pembelajaran</h2>
+  <p>Setelah mengikuti modul ini, mahasiswa diharapkan mampu:</p>
+  <ul>
+    <li>Menjelaskan perbedaan <strong>autentikasi</strong> (siapa kamu) dan <strong>otorisasi</strong> (apa yang boleh kamu lakukan).</li>
+    <li>Mengenali minimal tujuh jenis autentikasi yang umum dipakai di web dan REST API.</li>
+    <li>Mengaplikasikan aturan dasar keamanan: <em>least privilege</em>, <em>defense in depth</em>, dan <em>secure by default</em>.</li>
+    <li>Memilih metode autentikasi yang tepat berdasarkan kebutuhan aplikasi dan risiko.</li>
+    <li>Mengidentifikasi celah keamanan umum dan menerapkan praktik mitigasi.</li>
+  </ul>
+
+  <h2>Ruang Lingkup Modul</h2>
+  <p>Modul ini dibagi menjadi enam bab utama. Bab 02 menggali alasan <em>mengapa</em> autentikasi diperlukan lewat kerangka 5W1H. Bab 03 memperkenalkan tipe-tipe autentikasi dari yang paling sederhana hingga yang paling modern. Bab 04 menjelaskan aturan umum yang berlaku lintas teknologi. Bab 05 menyajikan tips dan best practice keamanan yang siap pakai. Bab 06 menutup dengan studi kasus nyata yang menghubungkan teori ke implementasi.</p>
+
+  <div class="takeaway">
+    <div class="takeaway-label">Pertanyaan yang dijawab modul ini</div>
+    Kenapa setiap aplikasi modern memerlukan autentikasi? Bagaimana cara kerja JWT, OAuth, dan API Key — dan kapan masing-masing dipakai? Apa kesalahan paling sering yang membuat sistem autentikasi dapat dibobol?
+  </div>
+</section>
+
+<!-- Chapter 02 -->
+<section class="chapter">
+  <div class="chapter-num">02 · Landasan</div>
+  <h1>5W1H — Mengapa Butuh Autentikasi</h1>
+
+  <p class="lead">
+    Sebelum membahas <em>bagaimana</em>, kita harus paham <em>kenapa</em>. Kerangka 5W1H (What, Why, Who, When, Where, How) membantu kita membongkar kebutuhan autentikasi secara sistematis.
+  </p>
+
+  <figure class="illus">
+    <div class="illus-label">Analogi Inti</div>
+    <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tamu masuk gedung aplikasi">
+      <g transform="translate(70, 200)">
+        <circle cx="0" cy="0" r="11" fill="#faf9f5" stroke="#1B365D" stroke-width="1.5"/>
+        <path d="M0,11 L0,45 M0,45 L-10,72 M0,45 L10,72 M0,22 L-14,38 M0,22 L18,34" fill="none" stroke="#1B365D" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="15" y="27" width="22" height="14" fill="#E4ECF5" stroke="#1B365D" stroke-width="1"/>
+        <circle cx="20" cy="32" r="2" fill="#1B365D"/>
+        <line x1="25" y1="30" x2="34" y2="30" stroke="#1B365D" stroke-width="0.6"/>
+        <line x1="25" y1="33" x2="34" y2="33" stroke="#1B365D" stroke-width="0.6"/>
+        <line x1="17" y1="37" x2="34" y2="37" stroke="#1B365D" stroke-width="0.6"/>
+        <text x="0" y="92" font-size="10" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500">Tamu</text>
+        <text x="0" y="105" font-size="9" font-family="serif" fill="#6b6a64" text-anchor="middle" font-style="italic">membawa KTP</text>
+      </g>
+      <path d="M120,245 Q170,260 215,270" stroke="#1B365D" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
+      <polygon points="215,270 207,266 209,274" fill="#1B365D"/>
+      <text x="165" y="248" font-size="9" font-family="serif" fill="#504e49" font-style="italic" text-anchor="middle">login</text>
+      <rect x="230" y="45" width="340" height="235" fill="#faf9f5" stroke="#1B365D" stroke-width="1.8"/>
+      <text x="400" y="35" font-size="10" font-family="serif" fill="#1B365D" text-anchor="middle" letter-spacing="2" font-weight="500">GEDUNG APLIKASI</text>
+      <line x1="230" y1="92" x2="570" y2="92" stroke="#1B365D" stroke-width="0.6" stroke-dasharray="2,2"/>
+      <line x1="230" y1="140" x2="570" y2="140" stroke="#1B365D" stroke-width="0.6" stroke-dasharray="2,2"/>
+      <line x1="230" y1="188" x2="570" y2="188" stroke="#1B365D" stroke-width="0.6" stroke-dasharray="2,2"/>
+      <line x1="230" y1="236" x2="570" y2="236" stroke="#1B365D" stroke-width="0.6" stroke-dasharray="2,2"/>
+      <text x="245" y="65" font-size="8" font-family="serif" fill="#1B365D" letter-spacing="0.4" font-weight="500">LT 4 · BRANKAS</text>
+      <text x="245" y="113" font-size="8" font-family="serif" fill="#1B365D" letter-spacing="0.4" font-weight="500">LT 3 · DIREKTUR</text>
+      <text x="245" y="161" font-size="8" font-family="serif" fill="#1B365D" letter-spacing="0.4" font-weight="500">LT 2 · MANAJER</text>
+      <text x="245" y="209" font-size="8" font-family="serif" fill="#1B365D" letter-spacing="0.4" font-weight="500">LT 1 · KARYAWAN</text>
+      <text x="245" y="257" font-size="8" font-family="serif" fill="#1B365D" letter-spacing="0.4" font-weight="500">LOBI · RESEPSIONIS</text>
+      <rect x="475" y="55" width="78" height="32" fill="#E4ECF5" stroke="#1B365D" stroke-width="1"/>
+      <circle cx="514" cy="71" r="6" fill="none" stroke="#1B365D" stroke-width="1.3"/>
+      <circle cx="514" cy="71" r="2.5" fill="#1B365D"/>
+      <line x1="514" y1="76" x2="514" y2="80" stroke="#1B365D" stroke-width="1.3"/>
+      <rect x="310" y="103" width="20" height="32" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="345" y="103" width="20" height="32" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="310" y="151" width="20" height="32" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="345" y="151" width="20" height="32" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="380" y="151" width="20" height="32" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="310" y="199" width="20" height="32" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="345" y="199" width="20" height="32" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="380" y="199" width="20" height="32" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="415" y="199" width="20" height="32" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="395" y="252" width="90" height="22" fill="#E4ECF5" stroke="#1B365D" stroke-width="1.2"/>
+      <circle cx="440" cy="247" r="6" fill="#faf9f5" stroke="#1B365D" stroke-width="1.2"/>
+      <line x1="440" y1="253" x2="440" y2="265" stroke="#1B365D" stroke-width="1"/>
+      <rect x="310" y="247" width="34" height="33" fill="none" stroke="#1B365D" stroke-width="1.5"/>
+      <line x1="327" y1="247" x2="327" y2="280" stroke="#1B365D" stroke-width="0.8"/>
+      <circle cx="320" cy="265" r="1" fill="#1B365D"/>
+      <circle cx="334" cy="265" r="1" fill="#1B365D"/>
+      <text x="514" y="100" font-size="8" font-family="serif" fill="#504e49" font-style="italic" text-anchor="middle">data sensitif</text>
+      <text x="440" y="290" font-size="8" font-family="serif" fill="#504e49" font-style="italic" text-anchor="middle">cek identitas</text>
+    </svg>
+    <figcaption>Gedung aplikasi dengan lantai-lantai bernilai berbeda. Tamu (pengguna) membawa identitas, resepsionis memverifikasinya, lalu kartu akses menentukan lantai mana yang boleh dimasuki.</figcaption>
+  </figure>
+
+  <h2>What — Apa itu Autentikasi?</h2>
+  <p>Autentikasi (<em>authentication</em>) adalah proses memverifikasi bahwa identitas yang diklaim seseorang atau sistem benar adanya. Sederhananya: <span class="hl">membuktikan kamu adalah kamu</span>. Hal ini berbeda dengan otorisasi, yang menentukan apa yang boleh dilakukan setelah identitas terverifikasi.</p>
+
+  <div class="callout">
+    Analogi: di gerbang masuk apartemen, satpam memeriksa KTP — itu autentikasi. Setelah masuk, kartu akses menentukan kamu boleh masuk lift ke lantai berapa — itu otorisasi.
+  </div>
+
+  <h2>Why — Mengapa Diperlukan?</h2>
+  <p>Setiap aplikasi yang menyimpan data atau memberikan layanan bernilai memerlukan autentikasi karena beberapa alasan fundamental:</p>
+  <ul>
+    <li><strong>Melindungi data pribadi pengguna</strong> — data medis, finansial, dan komunikasi tidak boleh diakses sembarang orang.</li>
+    <li><strong>Mencegah penyalahgunaan sumber daya</strong> — server, kuota API, dan kapasitas komputasi memiliki biaya nyata.</li>
+    <li><strong>Memenuhi kepatuhan regulasi</strong> — UU PDP (Indonesia), GDPR (Eropa), HIPAA (kesehatan AS), dan PCI-DSS (pembayaran) mewajibkan kontrol akses yang ketat.</li>
+    <li><strong>Menjaga akuntabilitas dan audit</strong> — setiap aksi penting harus bisa dikaitkan dengan identitas yang bertanggung jawab.</li>
+    <li><strong>Membangun kepercayaan pengguna</strong> — sistem yang mudah dibobol akan kehilangan reputasi dengan cepat.</li>
+  </ul>
+
+  <h2>Who — Siapa yang Diautentikasi?</h2>
+  <p>Subjek autentikasi tidak selalu manusia. Tiga kategori utama:</p>
+  <ul>
+    <li><strong>Pengguna akhir</strong> — manusia yang mengakses aplikasi web atau mobile.</li>
+    <li><strong>Layanan / sistem</strong> — service-to-service, microservice yang saling memanggil API.</li>
+    <li><strong>Aplikasi pihak ketiga</strong> — integrasi via OAuth, bot, atau plugin dari developer eksternal.</li>
+  </ul>
+
+  <h2>When — Kapan Autentikasi Berjalan?</h2>
+  <p>Autentikasi tidak hanya terjadi sekali. Tiga momen penting:</p>
+  <ul>
+    <li><strong>Saat login awal</strong> — verifikasi penuh dengan username/password atau metode setara.</li>
+    <li><strong>Sepanjang sesi</strong> — setiap request membawa bukti (cookie, token) bahwa pengguna masih sah.</li>
+    <li><strong>Saat aksi sensitif</strong> — re-authentication untuk transfer dana, ubah password, atau akses data kritikal.</li>
+  </ul>
+
+  <h2>Where — Di Lapisan Mana?</h2>
+  <p>Autentikasi diterapkan di berbagai lapisan arsitektur:</p>
+  <table>
+    <thead>
+      <tr><th>Lapisan</th><th>Bentuk Autentikasi</th><th>Contoh</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Frontend / Browser</td><td>Form login, cookie session</td><td>Halaman login web</td></tr>
+      <tr><td>API Gateway</td><td>Validasi token / API key</td><td>Kong, AWS API Gateway</td></tr>
+      <tr><td>Aplikasi / Service</td><td>Middleware autentikasi</td><td>Express middleware, Next.js middleware</td></tr>
+      <tr><td>Database</td><td>Credential, IAM role</td><td>Postgres roles, RDS IAM</td></tr>
+      <tr><td>Infrastruktur</td><td>SSH key, mTLS</td><td>Server access, service mesh</td></tr>
+    </tbody>
+  </table>
+
+  <h2>How — Bagaimana Mekanismenya?</h2>
+  <p>Autentikasi bekerja dengan memverifikasi minimal salah satu dari tiga faktor:</p>
+  <ul>
+    <li><strong>Something you know</strong> — password, PIN, jawaban keamanan.</li>
+    <li><strong>Something you have</strong> — ponsel (OTP), token fisik, kartu akses, kunci U2F.</li>
+    <li><strong>Something you are</strong> — sidik jari, wajah, suara, iris mata.</li>
+  </ul>
+
+  <figure class="illus">
+    <div class="illus-label">Tiga Faktor Identitas</div>
+    <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tiga faktor autentikasi">
+      <g transform="translate(100, 65)">
+        <circle cx="0" cy="0" r="28" fill="#faf9f5" stroke="#1B365D" stroke-width="1.5"/>
+        <path d="M -8 -4 L -8 -10 Q -8 -16 0 -16 Q 8 -16 8 -10 L 8 -4" fill="none" stroke="#1B365D" stroke-width="1.4" stroke-linecap="round"/>
+        <rect x="-10" y="-4" width="20" height="14" fill="#E4ECF5" stroke="#1B365D" stroke-width="1.2" rx="1"/>
+        <circle cx="0" cy="3" r="2" fill="#1B365D"/>
+        <text x="0" y="52" font-size="8" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500" letter-spacing="0.6">SESUATU YANG</text>
+        <text x="0" y="68" font-size="13" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500">DIKETAHUI</text>
+        <text x="0" y="88" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">password · PIN ·</text>
+        <text x="0" y="100" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">jawaban rahasia</text>
+      </g>
+      <g transform="translate(300, 65)">
+        <circle cx="0" cy="0" r="28" fill="#faf9f5" stroke="#1B365D" stroke-width="1.5"/>
+        <rect x="-8" y="-15" width="16" height="26" rx="2.5" fill="#E4ECF5" stroke="#1B365D" stroke-width="1.3"/>
+        <rect x="-5" y="-12" width="10" height="17" fill="#faf9f5" stroke="none"/>
+        <circle cx="0" cy="8" r="1.4" fill="#1B365D"/>
+        <text x="0" y="52" font-size="8" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500" letter-spacing="0.6">SESUATU YANG</text>
+        <text x="0" y="68" font-size="13" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500">DIMILIKI</text>
+        <text x="0" y="88" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">ponsel (OTP) ·</text>
+        <text x="0" y="100" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">token · YubiKey</text>
+      </g>
+      <g transform="translate(500, 65)">
+        <circle cx="0" cy="0" r="28" fill="#faf9f5" stroke="#1B365D" stroke-width="1.5"/>
+        <ellipse cx="0" cy="-1" rx="11" ry="13" fill="none" stroke="#1B365D" stroke-width="1.2"/>
+        <path d="M -7 5 Q -7 -8 0 -10 Q 7 -8 7 5 M -4 5 Q -4 -5 0 -7 Q 4 -5 4 5 M -1 5 L -1 0" fill="none" stroke="#1B365D" stroke-width="1" stroke-linecap="round"/>
+        <text x="0" y="52" font-size="8" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500" letter-spacing="0.6">SESUATU YANG</text>
+        <text x="0" y="68" font-size="13" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500">MELEKAT</text>
+        <text x="0" y="88" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">sidik jari · wajah ·</text>
+        <text x="0" y="100" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">iris · suara</text>
+      </g>
+      <text x="200" y="72" font-size="22" font-family="serif" fill="#6b6a64" text-anchor="middle">+</text>
+      <text x="400" y="72" font-size="22" font-family="serif" fill="#6b6a64" text-anchor="middle">+</text>
+      <line x1="80" y1="190" x2="520" y2="190" stroke="#e8e6dc" stroke-width="0.5"/>
+      <text x="300" y="208" font-size="10" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">Gabungan minimal 2 dari 3 = <tspan fill="#1B365D" font-weight="500" font-style="normal">Multi-Factor Authentication</tspan></text>
+    </svg>
+    <figcaption>Tiga kategori bukti identitas. Penyerang yang berhasil mencuri satu faktor (misal password) tetap kandas bila faktor lain juga diperlukan.</figcaption>
+  </figure>
+
+  <p>Sistem dianggap menggunakan <span class="hl">Multi-Factor Authentication (MFA)</span> bila menggabungkan minimal dua faktor yang berbeda kategori. MFA secara dramatis menurunkan risiko pengambilalihan akun.</p>
+</section>
+
+<!-- Chapter 03 -->
+<section class="chapter">
+  <div class="chapter-num">03 · Tipe Autentikasi</div>
+  <h1>Jenis-Jenis Autentikasi di Web &amp; REST API</h1>
+
+  <p class="lead">
+    Tidak ada satu metode yang cocok untuk semua kasus. Memilih metode autentikasi yang tepat berarti memahami trade-off antara keamanan, kemudahan implementasi, dan pengalaman pengguna.
+  </p>
+
+  <h2>1. HTTP Basic Authentication</h2>
+  <p>Skema paling sederhana: klien mengirim header <code>Authorization: Basic base64(user:password)</code> di setiap request. Hanya menggunakan Base64 (bukan enkripsi), sehingga <strong>wajib digunakan bersama HTTPS</strong>.</p>
+  <pre><code>GET /api/data HTTP/1.1
+Authorization: Basic dXNlcjpwYXNzd29yZA==</code></pre>
+  <p><span class="tag">Pro</span> Cepat untuk diimplementasikan, didukung semua browser dan klien HTTP.<br>
+  <span class="tag">Con</span> Kredensial dikirim di setiap request, sulit logout, tidak ada konsep sesi.</p>
+
+  <h2>2. Session-Based Authentication (Cookie)</h2>
+  <p>Setelah login berhasil, server membuat session ID dan menyimpannya di server (memory, Redis, atau database). Session ID dikirim ke browser melalui cookie. Setiap request membawa cookie tersebut, dan server memvalidasi sesinya.</p>
+  <p>Model ini <span class="hl">stateful</span> — server harus mengingat setiap sesi. Cocok untuk aplikasi web monolitik tradisional.</p>
+
+  <h2>3. Token-Based Authentication (JWT)</h2>
+  <p><em>JSON Web Token</em> adalah token <span class="hl">stateless</span> yang membawa informasi pengguna di dalam payload-nya, ditandatangani secara kriptografis. Struktur: <code>header.payload.signature</code>.</p>
+  <pre><code>eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMiLCJleHAiOjE3MDB9.SflKxw...</code></pre>
+  <p>Server tidak perlu menyimpan sesi — verifikasi cukup dengan memvalidasi tanda tangan. Ideal untuk REST API dan arsitektur microservice. Token dikirim via header <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+
+  <h2>4. OAuth 2.0 &amp; OpenID Connect</h2>
+  <p>OAuth 2.0 adalah <em>framework otorisasi</em> yang memungkinkan aplikasi pihak ketiga mengakses sumber daya pengguna tanpa membagikan password. OpenID Connect (OIDC) menambahkan lapisan autentikasi di atas OAuth 2.0.</p>
+  <p>Empat alur (grant types) utama:</p>
+  <ul>
+    <li><strong>Authorization Code</strong> — untuk aplikasi web server-side (paling aman).</li>
+    <li><strong>Authorization Code + PKCE</strong> — untuk SPA dan mobile (versi modern).</li>
+    <li><strong>Client Credentials</strong> — untuk komunikasi service-to-service.</li>
+    <li><strong>Device Code</strong> — untuk perangkat tanpa keyboard (smart TV, IoT).</li>
+  </ul>
+
+  <h2>5. API Key</h2>
+  <p>String panjang yang unik per klien atau aplikasi, dikirim via header (umumnya <code>X-API-Key</code>) atau query parameter. Sederhana, cocok untuk akses program-ke-program di mana identitas pengguna tidak penting.</p>
+  <p>Contoh layanan yang memakai: Stripe, OpenAI, Google Maps API, SendGrid.</p>
+
+  <h2>6. Multi-Factor Authentication (MFA / 2FA)</h2>
+  <p>Bukan metode autentikasi tunggal, tapi lapisan tambahan. Pengguna harus memberikan minimal dua bukti dari kategori berbeda. Implementasi umum:</p>
+  <ul>
+    <li><strong>TOTP</strong> — Google Authenticator, Authy (kode 6 digit yang berubah tiap 30 detik).</li>
+    <li><strong>SMS OTP</strong> — rentan SIM swapping, tidak direkomendasikan untuk akun bernilai tinggi.</li>
+    <li><strong>Push notification</strong> — Duo, Microsoft Authenticator.</li>
+    <li><strong>Hardware key</strong> — YubiKey, Google Titan (paling kuat secara kriptografis).</li>
+  </ul>
+
+  <h2>7. SAML &amp; Single Sign-On (SSO)</h2>
+  <p><em>Security Assertion Markup Language</em> adalah standar berbasis XML untuk SSO di lingkungan enterprise. Identitas dikelola oleh Identity Provider (IdP) seperti Okta, Azure AD, atau Google Workspace. Pengguna login sekali, dapat akses ke banyak aplikasi.</p>
+
+  <h2>8. Mutual TLS (mTLS)</h2>
+  <p>Berbeda dari HTTPS biasa yang hanya memverifikasi server, mTLS juga memverifikasi klien menggunakan sertifikat X.509. Standar de facto untuk komunikasi service-to-service di service mesh dan zero-trust network.</p>
+
+  <h2>9. Passwordless &amp; WebAuthn / Passkeys</h2>
+  <p>Tren modern: menghilangkan password sama sekali. <em>WebAuthn</em> (Web Authentication API) memungkinkan login pakai biometrik perangkat atau hardware key. <em>Passkeys</em> (Apple, Google, Microsoft) adalah penerapan WebAuthn yang sinkron lintas perangkat. Tahan terhadap phishing karena kunci tidak pernah meninggalkan perangkat.</p>
+
+  <h2>Ringkasan Perbandingan</h2>
+  <table>
+    <thead>
+      <tr><th>Tipe</th><th>State</th><th>Kompleksitas</th><th>Use Case Utama</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Basic Auth</td><td>Stateless</td><td>Rendah</td><td>Tool internal, prototype</td></tr>
+      <tr><td>Session Cookie</td><td>Stateful</td><td>Rendah-Menengah</td><td>Web app tradisional</td></tr>
+      <tr><td>JWT</td><td>Stateless</td><td>Menengah</td><td>SPA, REST API, microservice</td></tr>
+      <tr><td>OAuth 2.0 / OIDC</td><td>Stateless</td><td>Tinggi</td><td>Login sosial, integrasi third-party</td></tr>
+      <tr><td>API Key</td><td>Stateless</td><td>Rendah</td><td>Akses developer, M2M</td></tr>
+      <tr><td>MFA</td><td>Lapisan tambahan</td><td>Menengah</td><td>Semua akun bernilai tinggi</td></tr>
+      <tr><td>SAML / SSO</td><td>Federated</td><td>Tinggi</td><td>Enterprise, B2B</td></tr>
+      <tr><td>mTLS</td><td>Stateless</td><td>Tinggi</td><td>Service-to-service, zero trust</td></tr>
+      <tr><td>Passkeys / WebAuthn</td><td>Stateless</td><td>Menengah</td><td>Login modern, anti-phishing</td></tr>
+    </tbody>
+  </table>
+
+  <figure class="illus">
+    <div class="illus-label">Empat Pola Masuk Gedung</div>
+    <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Empat pola autentikasi sebagai analogi gedung">
+      <g transform="translate(15, 15)">
+        <rect x="0" y="0" width="275" height="118" fill="#faf9f5" stroke="#e8e6dc" stroke-width="0.8" rx="4"/>
+        <text x="14" y="20" font-size="9" font-family="serif" fill="#1B365D" font-weight="500" letter-spacing="0.4">BASIC AUTH · tunjukkan KTP di setiap pintu</text>
+        <circle cx="35" cy="65" r="6" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+        <path d="M35,71 L35,88 M35,88 L30,100 M35,88 L40,100" stroke="#1B365D" stroke-width="1" fill="none"/>
+        <rect x="80" y="58" width="14" height="42" fill="none" stroke="#504e49" stroke-width="1"/>
+        <rect x="68" y="82" width="14" height="9" fill="#E4ECF5" stroke="#1B365D" stroke-width="0.6"/>
+        <rect x="140" y="58" width="14" height="42" fill="none" stroke="#504e49" stroke-width="1"/>
+        <rect x="128" y="82" width="14" height="9" fill="#E4ECF5" stroke="#1B365D" stroke-width="0.6"/>
+        <rect x="200" y="58" width="14" height="42" fill="none" stroke="#504e49" stroke-width="1"/>
+        <rect x="188" y="82" width="14" height="9" fill="#E4ECF5" stroke="#1B365D" stroke-width="0.6"/>
+        <text x="138" y="112" font-size="8" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">setiap pintu → KTP lagi · melelahkan</text>
+      </g>
+      <g transform="translate(310, 15)">
+        <rect x="0" y="0" width="275" height="118" fill="#faf9f5" stroke="#e8e6dc" stroke-width="0.8" rx="4"/>
+        <text x="14" y="20" font-size="9" font-family="serif" fill="#1B365D" font-weight="500" letter-spacing="0.4">SESSION COOKIE · gelang dari resepsionis</text>
+        <circle cx="32" cy="65" r="6" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+        <path d="M32,71 L32,88 M32,88 L27,100 M32,88 L37,100 M32,76 L42,82" stroke="#1B365D" stroke-width="1" fill="none"/>
+        <circle cx="42" cy="82" r="3" fill="#1B365D"/>
+        <rect x="65" y="58" width="42" height="22" fill="#E4ECF5" stroke="#1B365D" stroke-width="1"/>
+        <text x="86" y="71" font-size="7" font-family="serif" fill="#1B365D" text-anchor="middle">Resepsi</text>
+        <rect x="130" y="58" width="14" height="42" fill="none" stroke="#504e49" stroke-width="1"/>
+        <text x="137" y="83" font-size="11" font-family="serif" fill="#1B365D" text-anchor="middle">✓</text>
+        <rect x="170" y="58" width="14" height="42" fill="none" stroke="#504e49" stroke-width="1"/>
+        <text x="177" y="83" font-size="11" font-family="serif" fill="#1B365D" text-anchor="middle">✓</text>
+        <rect x="210" y="58" width="14" height="42" fill="none" stroke="#504e49" stroke-width="1"/>
+        <text x="217" y="83" font-size="11" font-family="serif" fill="#1B365D" text-anchor="middle">✓</text>
+        <text x="138" y="112" font-size="8" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">sekali daftar, gelang dikenal semua pintu</text>
+      </g>
+      <g transform="translate(15, 148)">
+        <rect x="0" y="0" width="275" height="118" fill="#faf9f5" stroke="#e8e6dc" stroke-width="0.8" rx="4"/>
+        <text x="14" y="20" font-size="9" font-family="serif" fill="#1B365D" font-weight="500" letter-spacing="0.4">JWT · paspor mandiri ber-cap</text>
+        <circle cx="32" cy="65" r="6" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+        <path d="M32,71 L32,88 M32,88 L27,100 M32,88 L37,100 M32,76 L48,82" stroke="#1B365D" stroke-width="1" fill="none"/>
+        <rect x="48" y="78" width="18" height="11" fill="#1B365D" stroke="#1B365D" stroke-width="0.8"/>
+        <text x="57" y="86" font-size="6" font-family="serif" fill="#faf9f5" text-anchor="middle" font-weight="500">JWT</text>
+        <rect x="85" y="52" width="55" height="55" fill="none" stroke="#504e49" stroke-width="1"/>
+        <text x="112" y="68" font-size="7" font-family="serif" fill="#504e49" text-anchor="middle">Service A</text>
+        <text x="112" y="92" font-size="11" font-family="serif" fill="#1B365D" text-anchor="middle">✓</text>
+        <rect x="150" y="52" width="55" height="55" fill="none" stroke="#504e49" stroke-width="1"/>
+        <text x="177" y="68" font-size="7" font-family="serif" fill="#504e49" text-anchor="middle">Service B</text>
+        <text x="177" y="92" font-size="11" font-family="serif" fill="#1B365D" text-anchor="middle">✓</text>
+        <rect x="215" y="52" width="50" height="55" fill="none" stroke="#504e49" stroke-width="1"/>
+        <text x="240" y="68" font-size="7" font-family="serif" fill="#504e49" text-anchor="middle">Service C</text>
+        <text x="240" y="92" font-size="11" font-family="serif" fill="#1B365D" text-anchor="middle">✓</text>
+        <text x="138" y="112" font-size="8" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">tiap service verifikasi sendiri tanpa pusat</text>
+      </g>
+      <g transform="translate(310, 148)">
+        <rect x="0" y="0" width="275" height="118" fill="#faf9f5" stroke="#e8e6dc" stroke-width="0.8" rx="4"/>
+        <text x="14" y="20" font-size="9" font-family="serif" fill="#1B365D" font-weight="500" letter-spacing="0.4">OAUTH · surat rekomendasi dari Google</text>
+        <circle cx="30" cy="65" r="6" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+        <path d="M30,71 L30,88 M30,88 L25,100 M30,88 L35,100" stroke="#1B365D" stroke-width="1" fill="none"/>
+        <rect x="65" y="48" width="60" height="42" fill="#E4ECF5" stroke="#1B365D" stroke-width="1.2"/>
+        <text x="95" y="65" font-size="9" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500">Google</text>
+        <text x="95" y="80" font-size="7" font-family="serif" fill="#504e49" text-anchor="middle">(IdP)</text>
+        <path d="M125,68 Q140,62 158,68" stroke="#1B365D" stroke-width="0.8" fill="none" stroke-dasharray="2 2"/>
+        <rect x="142" y="60" width="14" height="16" fill="#faf9f5" stroke="#1B365D" stroke-width="0.7"/>
+        <line x1="145" y1="64" x2="153" y2="64" stroke="#1B365D" stroke-width="0.4"/>
+        <line x1="145" y1="67" x2="153" y2="67" stroke="#1B365D" stroke-width="0.4"/>
+        <line x1="145" y1="70" x2="151" y2="70" stroke="#1B365D" stroke-width="0.4"/>
+        <rect x="180" y="48" width="65" height="42" fill="none" stroke="#1B365D" stroke-width="1.2"/>
+        <text x="212" y="65" font-size="9" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500">Aplikasi</text>
+        <text x="212" y="83" font-size="13" font-family="serif" fill="#1B365D" text-anchor="middle">✓</text>
+        <text x="138" y="112" font-size="8" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">pihak ketiga terpercaya jamin identitasmu</text>
+      </g>
+    </svg>
+    <figcaption>Empat cara tamu melewati pintu gedung: tunjuk KTP terus-menerus (Basic), pasang gelang sekali pakai (Session), bawa paspor mandiri (JWT), atau dijamin pihak ketiga (OAuth).</figcaption>
+  </figure>
+</section>
+
+<!-- Chapter 04 -->
+<section class="chapter">
+  <div class="chapter-num">04 · Aturan Dasar</div>
+  <h1>Aturan Umum Autentikasi &amp; Otorisasi</h1>
+
+  <p class="lead">
+    Tanpa memahami prinsip dasar di balik autentikasi dan otorisasi, kita rentan membuat keputusan implementasi yang tampak benar tapi sebetulnya membuka celah. Bab ini merangkum aturan yang berlaku lintas teknologi.
+  </p>
+
+  <h2>AuthN vs AuthZ — Dua Hal yang Berbeda</h2>
+  <p>Salah satu kesalahan paling umum adalah mencampuradukkan keduanya. Pisahkan secara tegas:</p>
+  <table>
+    <thead>
+      <tr><th>Aspek</th><th>Autentikasi (AuthN)</th><th>Otorisasi (AuthZ)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Pertanyaan</td><td>Siapa kamu?</td><td>Apa yang boleh kamu lakukan?</td></tr>
+      <tr><td>Terjadi</td><td>Sebelum</td><td>Setelah autentikasi</td></tr>
+      <tr><td>Output</td><td>Identitas terverifikasi</td><td>Izin / penolakan</td></tr>
+      <tr><td>Contoh</td><td>Login dengan email/password</td><td>Hanya admin yang bisa hapus user</td></tr>
+    </tbody>
+  </table>
+
+  <figure class="illus">
+    <div class="illus-label">Dua Adegan di Gedung</div>
+    <svg viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Autentikasi versus otorisasi">
+      <g transform="translate(40, 30)">
+        <text x="120" y="0" font-size="10" font-family="serif" fill="#1B365D" text-anchor="middle" letter-spacing="2" font-weight="500">AUTENTIKASI</text>
+        <text x="120" y="14" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">"Siapa kamu?"</text>
+        <line x1="120" y1="40" x2="120" y2="170" stroke="#1B365D" stroke-width="2"/>
+        <g transform="translate(50, 100)">
+          <circle cx="0" cy="0" r="10" fill="#faf9f5" stroke="#1B365D" stroke-width="1.3"/>
+          <path d="M0,10 L0,36 M0,36 L-8,58 M0,36 L8,58 M0,18 L14,28" fill="none" stroke="#1B365D" stroke-width="1.3"/>
+          <rect x="13" y="22" width="14" height="10" fill="#E4ECF5" stroke="#1B365D" stroke-width="0.8"/>
+        </g>
+        <g transform="translate(160, 100)">
+          <path d="M -9 -5 L 9 -5 L 11 -8 L -11 -8 Z" fill="#1B365D" stroke="#1B365D" stroke-width="0.6"/>
+          <circle cx="0" cy="0" r="10" fill="#faf9f5" stroke="#1B365D" stroke-width="1.3"/>
+          <path d="M0,10 L0,36 M0,36 L-8,58 M0,36 L8,58" fill="none" stroke="#1B365D" stroke-width="1.3"/>
+          <line x1="0" y1="18" x2="-15" y2="22" stroke="#1B365D" stroke-width="1.3"/>
+          <line x1="0" y1="18" x2="-14" y2="30" stroke="#1B365D" stroke-width="1.3"/>
+        </g>
+        <g transform="translate(115, 90)">
+          <circle cx="0" cy="0" r="8" fill="#faf9f5" stroke="#1B365D" stroke-width="1.3"/>
+          <line x1="6" y1="6" x2="11" y2="11" stroke="#1B365D" stroke-width="1.6" stroke-linecap="round"/>
+        </g>
+        <text x="120" y="195" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle">Satpam memeriksa KTP</text>
+        <text x="120" y="208" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">→ identitas terverifikasi</text>
+      </g>
+      <line x1="300" y1="40" x2="300" y2="200" stroke="#e8e6dc" stroke-width="0.6" stroke-dasharray="4 4"/>
+      <g transform="translate(320, 30)">
+        <text x="120" y="0" font-size="10" font-family="serif" fill="#1B365D" text-anchor="middle" letter-spacing="2" font-weight="500">OTORISASI</text>
+        <text x="120" y="14" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">"Boleh kamu masuk lantai mana?"</text>
+        <rect x="80" y="40" width="80" height="140" rx="3" fill="#faf9f5" stroke="#1B365D" stroke-width="1.5"/>
+        <circle cx="105" cy="60" r="9" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+        <text x="105" y="64" font-size="10" font-family="serif" fill="#504e49" text-anchor="middle">4</text>
+        <text x="118" y="55" font-size="13" font-family="serif" fill="#504e49" opacity="0.6">×</text>
+        <text x="140" y="63" font-size="8" font-family="serif" fill="#6b6a64">brankas</text>
+        <circle cx="105" cy="88" r="9" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+        <text x="105" y="92" font-size="10" font-family="serif" fill="#504e49" text-anchor="middle">3</text>
+        <text x="118" y="83" font-size="13" font-family="serif" fill="#504e49" opacity="0.6">×</text>
+        <text x="140" y="91" font-size="8" font-family="serif" fill="#6b6a64">direktur</text>
+        <circle cx="105" cy="116" r="9" fill="#1B365D" stroke="#1B365D" stroke-width="1"/>
+        <text x="105" y="120" font-size="10" font-family="serif" fill="#faf9f5" text-anchor="middle" font-weight="500">2</text>
+        <text x="140" y="119" font-size="8" font-family="serif" fill="#1B365D" font-weight="500">manajer ✓</text>
+        <circle cx="105" cy="144" r="9" fill="#1B365D" stroke="#1B365D" stroke-width="1"/>
+        <text x="105" y="148" font-size="10" font-family="serif" fill="#faf9f5" text-anchor="middle" font-weight="500">1</text>
+        <text x="140" y="147" font-size="8" font-family="serif" fill="#1B365D" font-weight="500">karyawan ✓</text>
+        <text x="120" y="195" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle">Kartu akses tentukan lantai</text>
+        <text x="120" y="208" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">→ izin yang diberikan</text>
+      </g>
+    </svg>
+    <figcaption>Satpam mengecek KTP kamu di lobi (autentikasi). Setelah itu, kartu akses menentukan tombol lift mana yang menyala buatmu (otorisasi). Dua proses yang berbeda — keduanya wajib.</figcaption>
+  </figure>
+
+  <h2>Principle of Least Privilege</h2>
+  <p>Berikan hak akses <em>seminimal mungkin</em> yang dibutuhkan untuk menjalankan tugas. Pengguna baru tidak otomatis admin. Service yang hanya membaca data tidak perlu hak menulis. Ini membatasi <span class="hl">blast radius</span> ketika sebuah akun atau service terbobol.</p>
+
+  <h2>Defense in Depth</h2>
+  <p>Jangan mengandalkan satu lapisan saja. Bila WAF terlewat, ada rate limiting. Bila rate limiting terlewat, ada validasi input. Bila validasi terlewat, ada parameterized query. Setiap lapisan harus berasumsi lapisan di atasnya bisa gagal.</p>
+
+  <figure class="illus">
+    <div class="illus-label">Lapisan Pertahanan Berlapis</div>
+    <svg viewBox="0 0 500 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Defense in depth berlapis">
+      <circle cx="250" cy="170" r="148" fill="#faf9f5" stroke="#1B365D" stroke-width="1.2"/>
+      <text x="250" y="38" font-size="9" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500" letter-spacing="1">PAGAR LUAR · HTTPS / TLS</text>
+      <circle cx="250" cy="170" r="120" fill="#faf9f5" stroke="#1B365D" stroke-width="1.2"/>
+      <text x="250" y="68" font-size="9" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500" letter-spacing="1">SATPAM · Rate Limit · WAF</text>
+      <circle cx="250" cy="170" r="92" fill="#E4ECF5" stroke="#1B365D" stroke-width="1.2"/>
+      <text x="250" y="98" font-size="9" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500" letter-spacing="1">PINTU GERBANG · Autentikasi</text>
+      <circle cx="250" cy="170" r="62" fill="#faf9f5" stroke="#1B365D" stroke-width="1.2"/>
+      <text x="250" y="128" font-size="9" font-family="serif" fill="#1B365D" text-anchor="middle" font-weight="500" letter-spacing="1">LIFT · Otorisasi</text>
+      <circle cx="250" cy="170" r="34" fill="#1B365D" stroke="#1B365D" stroke-width="1.5"/>
+      <text x="250" y="168" font-size="11" font-family="serif" fill="#faf9f5" text-anchor="middle" font-weight="500">DATA</text>
+      <text x="250" y="182" font-size="8" font-family="serif" fill="#E4ECF5" text-anchor="middle" letter-spacing="0.6">sensitif</text>
+      <g transform="translate(40, 170)">
+        <path d="M0,0 L60,0" stroke="#1B365D" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <polygon points="60,0 52,-4 52,4" fill="#1B365D"/>
+        <text x="30" y="-8" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">serangan</text>
+      </g>
+      <text x="250" y="328" font-size="9" font-family="serif" fill="#504e49" text-anchor="middle" font-style="italic">Setiap lapisan berasumsi lapisan di luarnya bisa jebol</text>
+    </svg>
+    <figcaption>Penyerang harus menembus banyak lapisan untuk sampai ke data inti — pagar, satpam, gerbang, lift, sampai ruangan terkunci. Satu lapisan jebol bukan akhir cerita.</figcaption>
+  </figure>
+
+  <h2>Secure by Default</h2>
+  <p>Konfigurasi paling aman harus menjadi <em>default</em>. Cookie harus <code>HttpOnly</code> dan <code>Secure</code> tanpa perlu diatur. Endpoint baru harus memerlukan autentikasi kecuali eksplisit di-allow-list publik. <strong>Lebih baik error karena terlalu ketat, daripada bocor karena terlalu longgar.</strong></p>
+
+  <h2>Zero Trust</h2>
+  <p>Asumsikan tidak ada zona yang inheren aman. Bahkan internal network bisa dikompromikan. Setiap request — termasuk service-to-service — harus diautentikasi dan diotorisasi. Slogan: <em>never trust, always verify</em>.</p>
+
+  <h2>Don't Roll Your Own Crypto</h2>
+  <p>Jangan menciptakan algoritma kriptografi atau skema hashing sendiri. Gunakan library yang sudah teruji: <strong>bcrypt</strong>, <strong>argon2</strong>, <strong>scrypt</strong> untuk password; <strong>HMAC-SHA256</strong> atau library JWT yang well-known untuk token.</p>
+
+  <div class="callout">
+    Aturan praktis: kalau Anda merasa kreatif dengan keamanan, berhenti dulu. Konsultasikan ke kolega senior atau review komunitas. Implementasi kriptografi yang salah tampak baik-baik saja sampai dibobol.
+  </div>
+
+  <h2>Fail Securely</h2>
+  <p>Saat terjadi error, sistem harus gagal ke arah yang <em>lebih aman</em>, bukan lebih terbuka. Bila pemeriksaan otorisasi melempar exception, default harus menolak akses — bukan mengizinkannya.</p>
+
+  <h2>Separation of Concerns</h2>
+  <p>Pisahkan logic autentikasi dan otorisasi dari logic bisnis. Tempatkan di middleware terpusat. Kalau setiap controller punya implementasi cek-izin sendiri, satu controller yang lupa cek akan menjadi celah.</p>
+
+  <h2>Audit Trail</h2>
+  <p>Setiap aksi penting — login, perubahan password, akses data sensitif, perubahan izin — harus tercatat dengan informasi: <em>siapa, kapan, dari mana (IP, user agent), apa yang dilakukan</em>. Audit log harus immutable dan disimpan terpisah dari database utama.</p>
+</section>
+
+<!-- Chapter 05 -->
+<section class="chapter">
+  <div class="chapter-num">05 · Best Practice</div>
+  <h1>Security Tips &amp; Best Practice</h1>
+
+  <p class="lead">
+    Bab ini berisi praktik konkret yang siap diterapkan — daftar yang harus dicentang sebelum aplikasi Anda dianggap layak produksi.
+  </p>
+
+  <h2>Penyimpanan Password</h2>
+  <ul>
+    <li><strong>Jangan pernah simpan password plaintext.</strong> Pernah ada perusahaan besar yang melakukannya — dan terbongkar saat database bocor.</li>
+    <li>Gunakan algoritma <em>password hashing</em> yang dirancang khusus: <code>bcrypt</code>, <code>argon2id</code> (paling direkomendasikan), atau <code>scrypt</code>. Hindari MD5, SHA-1, atau SHA-256 polos — terlalu cepat dan rentan brute force.</li>
+    <li>Setiap password harus pakai <strong>salt unik</strong>. Library modern menangani ini otomatis.</li>
+    <li>Atur <em>work factor</em> sehingga hashing memakan ~250 ms di server produksi — cukup lambat untuk menghambat brute force, cukup cepat untuk UX login.</li>
+  </ul>
+
+  <h2>Manajemen Sesi &amp; Token</h2>
+  <ul>
+    <li>Session ID harus <strong>random</strong> dan minimal <strong>128 bit</strong> entropy.</li>
+    <li>Cookie sesi: <code>HttpOnly</code> (tidak bisa dibaca JavaScript), <code>Secure</code> (hanya via HTTPS), <code>SameSite=Lax</code> atau <code>Strict</code> (proteksi CSRF).</li>
+    <li>Set <strong>expiry yang wajar</strong> — JWT access token: 15 menit hingga 1 jam. Refresh token: hari hingga minggu, rotasi setiap pemakaian.</li>
+    <li>Invalidasi sesi saat logout, ganti password, atau aktivitas mencurigakan.</li>
+    <li>Untuk JWT: simpan blacklist untuk token yang harus di-revoke segera (atau pakai opaque token).</li>
+  </ul>
+
+  <h2>Proteksi terhadap Brute Force</h2>
+  <ul>
+    <li><strong>Rate limiting</strong> per IP dan per akun — misal maksimum 5 percobaan login per menit.</li>
+    <li><strong>Account lockout sementara</strong> setelah N percobaan gagal — tapi hati-hati, ini bisa dipakai untuk DoS akun pengguna.</li>
+    <li><strong>CAPTCHA</strong> atau proof-of-work setelah beberapa percobaan gagal.</li>
+    <li>Pantau pola <em>credential stuffing</em> — banyak percobaan dengan kredensial bocor dari breach lain.</li>
+  </ul>
+
+  <h2>Komunikasi Aman</h2>
+  <ul>
+    <li><strong>HTTPS di mana-mana</strong> — tidak ada pengecualian, bahkan di staging. Pakai HSTS untuk memaksa.</li>
+    <li>TLS minimal versi 1.2, idealnya 1.3. Disable cipher lama (RC4, 3DES).</li>
+    <li>Sertifikat dari Let's Encrypt atau CA tepercaya. Otomatisasi renewal.</li>
+  </ul>
+
+  <h2>Proteksi Lapisan Web</h2>
+  <ul>
+    <li><strong>CSRF</strong> — pakai token CSRF, SameSite cookie, atau header verification untuk endpoint state-changing.</li>
+    <li><strong>XSS</strong> — escape semua output, gunakan Content Security Policy (CSP), hindari <code>dangerouslySetInnerHTML</code>.</li>
+    <li><strong>Clickjacking</strong> — set header <code>X-Frame-Options: DENY</code> atau CSP <code>frame-ancestors 'none'</code>.</li>
+    <li><strong>Open redirect</strong> — validasi URL tujuan setelah login, jangan trust parameter mentah.</li>
+  </ul>
+
+  <h2>Validasi Input &amp; Pesan Error</h2>
+  <ul>
+    <li>Validasi semua input di sisi server, bukan hanya di klien.</li>
+    <li><strong>Pesan error login harus generic</strong> — <em>"Email atau password salah"</em>, bukan <em>"Password salah"</em> (yang membocorkan bahwa email ada).</li>
+    <li>Jangan bocorkan stack trace atau detail teknis ke pengguna akhir.</li>
+  </ul>
+
+  <h2>Multi-Factor Authentication</h2>
+  <ul>
+    <li><strong>Wajibkan MFA</strong> untuk akun admin, akun developer, dan akses ke data sensitif.</li>
+    <li>Tawarkan MFA opsional untuk semua pengguna.</li>
+    <li>Prioritas: hardware key &gt; push notification &gt; TOTP &gt; SMS (SMS hanya sebagai fallback terakhir).</li>
+    <li>Sediakan <strong>recovery code</strong> sekali pakai untuk pemulihan akun.</li>
+  </ul>
+
+  <figure class="illus">
+    <div class="illus-label">Pintu dengan Tiga Kunci</div>
+    <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MFA pintu tiga kunci">
+      <text x="250" y="25" font-size="11" font-family="serif" fill="#1B365D" text-anchor="middle" letter-spacing="2" font-weight="500">MFA — TIGA KUNCI INDEPENDEN</text>
+      <rect x="200" y="45" width="120" height="220" fill="#faf9f5" stroke="#1B365D" stroke-width="2"/>
+      <line x1="200" y1="45" x2="320" y2="45" stroke="#1B365D" stroke-width="2.5"/>
+      <rect x="213" y="58" width="94" height="55" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="213" y="125" width="94" height="55" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <rect x="213" y="192" width="94" height="55" fill="none" stroke="#504e49" stroke-width="0.8"/>
+      <g transform="translate(180, 85)">
+        <rect x="-10" y="-8" width="20" height="16" rx="2" fill="#E4ECF5" stroke="#1B365D" stroke-width="1.2"/>
+        <path d="M -6 -8 L -6 -14 Q -6 -18 0 -18 Q 6 -18 6 -14 L 6 -8" fill="none" stroke="#1B365D" stroke-width="1.2"/>
+        <circle cx="0" cy="0" r="2" fill="#1B365D"/>
+      </g>
+      <line x1="190" y1="85" x2="213" y2="85" stroke="#1B365D" stroke-width="1" stroke-dasharray="2 2"/>
+      <text x="160" y="85" font-size="10" font-family="serif" fill="#1B365D" font-weight="500" text-anchor="end">PIN / Password</text>
+      <text x="160" y="98" font-size="8" font-family="serif" fill="#504e49" font-style="italic" text-anchor="end">(yang diketahui)</text>
+      <g transform="translate(180, 152)">
+        <rect x="-7" y="-12" width="14" height="22" rx="1.5" fill="#E4ECF5" stroke="#1B365D" stroke-width="1.2"/>
+        <line x1="-4" y1="-7" x2="4" y2="-7" stroke="#1B365D" stroke-width="0.6"/>
+        <line x1="-4" y1="-4" x2="4" y2="-4" stroke="#1B365D" stroke-width="0.6"/>
+        <line x1="-4" y1="-1" x2="4" y2="-1" stroke="#1B365D" stroke-width="0.6"/>
+        <circle cx="0" cy="6" r="1.3" fill="#1B365D"/>
+      </g>
+      <line x1="190" y1="152" x2="213" y2="152" stroke="#1B365D" stroke-width="1" stroke-dasharray="2 2"/>
+      <text x="160" y="152" font-size="10" font-family="serif" fill="#1B365D" font-weight="500" text-anchor="end">OTP via Ponsel</text>
+      <text x="160" y="165" font-size="8" font-family="serif" fill="#504e49" font-style="italic" text-anchor="end">(yang dimiliki)</text>
+      <g transform="translate(180, 219)">
+        <ellipse cx="0" cy="0" rx="10" ry="11" fill="none" stroke="#1B365D" stroke-width="1.2"/>
+        <path d="M -6 4 Q -6 -7 0 -8 Q 6 -7 6 4 M -3 4 Q -3 -4 0 -5 Q 3 -4 3 4" fill="none" stroke="#1B365D" stroke-width="1"/>
+      </g>
+      <line x1="190" y1="219" x2="213" y2="219" stroke="#1B365D" stroke-width="1" stroke-dasharray="2 2"/>
+      <text x="160" y="219" font-size="10" font-family="serif" fill="#1B365D" font-weight="500" text-anchor="end">Sidik Jari</text>
+      <text x="160" y="232" font-size="8" font-family="serif" fill="#504e49" font-style="italic" text-anchor="end">(yang melekat)</text>
+      <text x="340" y="105" font-size="10" font-family="serif" fill="#1B365D" font-weight="500">Penyerang yang mencuri</text>
+      <text x="340" y="120" font-size="10" font-family="serif" fill="#1B365D" font-weight="500">satu kunci tetap tidak</text>
+      <text x="340" y="135" font-size="10" font-family="serif" fill="#1B365D" font-weight="500">bisa membuka pintu.</text>
+      <text x="340" y="170" font-size="9" font-family="serif" fill="#504e49" font-style="italic">Tiap kunci independen,</text>
+      <text x="340" y="184" font-size="9" font-family="serif" fill="#504e49" font-style="italic">dari kategori faktor</text>
+      <text x="340" y="198" font-size="9" font-family="serif" fill="#504e49" font-style="italic">yang berbeda.</text>
+    </svg>
+    <figcaption>Bayangkan pintu brankas dengan tiga kunci yang sangat berbeda — kombinasi angka, kunci fisik, dan sidik jari. Mencuri satu tidak cukup; itulah esensi Multi-Factor Authentication.</figcaption>
+  </figure>
+
+  <h2>Secret Management</h2>
+  <ul>
+    <li>Jangan commit credential ke git. Pakai <code>.env</code> yang di-<em>gitignore</em>, atau secret manager (AWS Secrets Manager, HashiCorp Vault, Doppler).</li>
+    <li>Rotasi secret secara berkala, terutama saat ada developer keluar tim.</li>
+    <li>Pakai variabel environment untuk konfigurasi sensitif, bukan hardcode.</li>
+  </ul>
+
+  <h2>Logging &amp; Monitoring</h2>
+  <ul>
+    <li>Catat: login berhasil/gagal, perubahan password, perubahan email, perubahan izin, akses data sensitif.</li>
+    <li><strong>Jangan</strong> log password, token utuh, atau data sensitif lainnya.</li>
+    <li>Set alerting untuk pola anomali — login dari geografi baru, banyak percobaan gagal, akses di luar jam normal.</li>
+  </ul>
+
+  <div class="takeaway">
+    <div class="takeaway-label">Checklist Pre-Production</div>
+    HTTPS aktif? Password di-hash dengan argon2/bcrypt? Rate limiting di endpoint login? Cookie HttpOnly+Secure+SameSite? Token punya expiry? MFA tersedia? Pesan error tidak membocorkan info? Audit log berjalan? Secret tidak hardcode? Bila semua centang — Anda sudah lebih aman dari mayoritas aplikasi di internet.
+  </div>
+</section>
+
+<!-- Chapter 06 -->
+<section class="chapter">
+  <div class="chapter-num">06 · Studi Kasus</div>
+  <h1>Use Case Nyata per Tipe Autentikasi</h1>
+
+  <p class="lead">
+    Teori menjadi hidup ketika dikaitkan dengan implementasi nyata. Bab ini memetakan setiap tipe autentikasi ke skenario industri yang sebenarnya — sehingga ketika Anda bertemu kebutuhan serupa, Anda tahu harus mulai dari mana.
+  </p>
+
+  <div class="use-case">
+    <div class="meta">Tipe — Basic Authentication</div>
+    <h3>Dashboard Internal Tim Operasional</h3>
+    <p><strong>Konteks:</strong> sebuah startup butuh halaman admin sederhana untuk lima orang tim operasional. Halaman ini hanya diakses dari kantor.</p>
+    <p><strong>Kenapa cocok:</strong> jumlah pengguna sangat sedikit, tidak ada kebutuhan logout/refresh token, dan implementasi cukup beberapa baris kode di reverse proxy (Nginx, Caddy). Cepat dipasang, cukup aman bila digabung dengan IP allowlist dan HTTPS.</p>
+    <p><strong>Kapan jangan dipakai:</strong> aplikasi yang dihadapkan ke publik, atau yang menyimpan data pengguna lain.</p>
+  </div>
+
+  <div class="use-case">
+    <div class="meta">Tipe — Session Cookie</div>
+    <h3>E-commerce Tradisional (Laravel, Rails, Django)</h3>
+    <p><strong>Konteks:</strong> toko online dengan keranjang belanja, riwayat pesanan, alamat pengiriman. Pengguna login lalu melakukan banyak aksi dalam satu sesi.</p>
+    <p><strong>Kenapa cocok:</strong> framework klasik sudah menyediakan session management matang. Server-side state memudahkan logout instan, deteksi multi-device, dan invalidasi sesi saat ada perubahan password. Pengalaman pengguna mulus karena cookie ter-handle browser.</p>
+    <p><strong>Catatan:</strong> simpan session di Redis (bukan memory) supaya horizontal scaling tetap mudah.</p>
+  </div>
+
+  <div class="use-case">
+    <div class="meta">Tipe — JWT (JSON Web Token)</div>
+    <h3>Aplikasi Mobile + REST API Backend</h3>
+    <p><strong>Konteks:</strong> aplikasi ride-hailing dengan klien Android, iOS, dan dashboard web. Backend microservice (auth service, ride service, payment service) saling terpisah.</p>
+    <p><strong>Kenapa cocok:</strong> JWT stateless — payment service bisa memverifikasi token sendiri tanpa memanggil auth service untuk setiap request. Ini mengurangi latency dan menghilangkan single point of failure. Mobile app menyimpan token di Keychain/Keystore, dan refresh token-nya secara berkala.</p>
+    <p><strong>Pitfall yang harus dihindari:</strong> jangan simpan JWT di <code>localStorage</code> (rentan XSS) — pakai cookie HttpOnly atau memory untuk SPA web. Selalu validasi <code>exp</code> dan signature.</p>
+  </div>
+
+  <div class="use-case">
+    <div class="meta">Tipe — OAuth 2.0 / OpenID Connect</div>
+    <h3>"Login dengan Google" di Aplikasi SaaS</h3>
+    <p><strong>Konteks:</strong> SaaS produktivitas (mirip Notion atau Figma) ingin onboarding tanpa friksi. Pengguna malas membuat password baru.</p>
+    <p><strong>Kenapa cocok:</strong> Google/Microsoft sudah menangani password security, MFA, dan recovery. Aplikasi cukup percaya identitas yang divalidasi oleh provider. OpenID Connect memberikan ID token berisi informasi pengguna (nama, email, foto).</p>
+    <p><strong>Bonus use case:</strong> integrasi pihak ketiga — aplikasi Anda ingin baca kalender pengguna di Google Calendar tanpa minta password Google. OAuth 2.0 menyelesaikannya dengan scoped access token.</p>
+  </div>
+
+  <div class="use-case">
+    <div class="meta">Tipe — API Key</div>
+    <h3>Layanan Pembayaran ke Sistem Merchant</h3>
+    <p><strong>Konteks:</strong> Midtrans, Xendit, atau Stripe memberikan API kepada merchant untuk membuat transaksi pembayaran. Yang mengakses adalah server merchant, bukan pengguna akhir.</p>
+    <p><strong>Kenapa cocok:</strong> tidak ada konsep "pengguna" dalam interaksi ini — yang penting adalah <em>merchant X</em> yang sah memanggil API. API key dengan rate limit per kunci, scope terbatas, dan bisa di-revoke independen sangat cocok.</p>
+    <p><strong>Best practice:</strong> beri test key (sandbox) dan live key terpisah. Tampilkan key sekali saat dibuat, hash-kan di database. Sediakan UI untuk rotasi.</p>
+  </div>
+
+  <div class="use-case">
+    <div class="meta">Tipe — MFA / 2FA</div>
+    <h3>Internet Banking &amp; Dompet Digital</h3>
+    <p><strong>Konteks:</strong> aplikasi bank mobile atau e-wallet menyimpan dana nyata pengguna. Kebocoran password tunggal tidak boleh berakibat pencurian dana.</p>
+    <p><strong>Kenapa cocok:</strong> regulasi (Bank Indonesia, OJK) mensyaratkan strong customer authentication. MFA dengan PIN + OTP (push ke aplikasi) + biometrik perangkat membuat pengambilalihan akun jauh lebih sulit.</p>
+    <p><strong>Pola umum:</strong> login awal dengan PIN, transaksi besar memerlukan re-authentication via biometrik atau OTP. Setiap perangkat baru harus diverifikasi.</p>
+  </div>
+
+  <div class="use-case">
+    <div class="meta">Tipe — SAML / SSO</div>
+    <h3>Korporasi 5000 Karyawan dengan 30+ SaaS</h3>
+    <p><strong>Konteks:</strong> perusahaan memakai Slack, Jira, GitHub, Salesforce, Notion. Setiap karyawan harus login ke semuanya — dan ketika seseorang resign, akses harus dicabut serempak.</p>
+    <p><strong>Kenapa cocok:</strong> SAML memungkinkan IdP (Okta, Azure AD) menjadi sumber kebenaran identitas. Onboarding sekali klik, offboarding sekali klik. Audit log terpusat. MFA cukup di IdP, semua aplikasi ikut.</p>
+    <p><strong>Catatan:</strong> SAML kompleks dan berbasis XML. Untuk integrasi modern, OIDC sering lebih sederhana dan disukai vendor baru.</p>
+  </div>
+
+  <div class="use-case">
+    <div class="meta">Tipe — Mutual TLS (mTLS)</div>
+    <h3>Komunikasi Antar Microservice di Service Mesh</h3>
+    <p><strong>Konteks:</strong> arsitektur dengan puluhan microservice yang saling memanggil di cluster Kubernetes. Setiap service harus yakin bahwa pemanggilnya benar service yang dimaksud, bukan attacker yang menembus internal network.</p>
+    <p><strong>Kenapa cocok:</strong> mTLS memverifikasi kedua sisi dengan sertifikat. Istio / Linkerd menangani penerbitan dan rotasi sertifikat otomatis. Tidak ada token yang bisa bocor — kompromi membutuhkan kunci privat.</p>
+    <p><strong>Use case lain:</strong> integrasi B2B finansial yang diatur regulasi (open banking, host-to-host).</p>
+  </div>
+
+  <div class="use-case">
+    <div class="meta">Tipe — WebAuthn / Passkeys</div>
+    <h3>Login Modern di Google, Apple, GitHub</h3>
+    <p><strong>Konteks:</strong> platform besar ingin menghilangkan password yang menjadi sumber phishing dan kebocoran. Passkey memungkinkan login pakai biometrik perangkat (Face ID, sidik jari) dengan kunci kriptografis tersinkronisasi via cloud akun.</p>
+    <p><strong>Kenapa cocok:</strong> tahan phishing (kunci terikat ke origin asli), tidak ada yang bisa dicuri dari database (server hanya menyimpan public key), UX jauh lebih cepat daripada password + OTP.</p>
+    <p><strong>Tren:</strong> sebagian besar platform besar sekarang mendukung passkey sebagai alternatif. Ekspektasinya, dalam 5-10 tahun, password akan menjadi metode legacy.</p>
+  </div>
+
+  <h2>Pola Pemilihan Cepat</h2>
+  <p>Bila ragu memilih metode, gunakan pohon keputusan berikut:</p>
+  <ul>
+    <li>Aplikasi web tradisional, satu domain → <strong>Session Cookie</strong>.</li>
+    <li>SPA atau mobile + REST API → <strong>JWT</strong> (access + refresh token).</li>
+    <li>Butuh "Login dengan X" → <strong>OAuth 2.0 / OIDC</strong>.</li>
+    <li>API untuk developer eksternal → <strong>API Key</strong>.</li>
+    <li>Komunikasi service-to-service internal → <strong>mTLS</strong>.</li>
+    <li>Akun bernilai tinggi (uang, data medis, akses produksi) → tambahkan <strong>MFA</strong>.</li>
+    <li>Konteks korporasi dengan banyak SaaS → <strong>SAML / OIDC SSO</strong>.</li>
+  </ul>
+</section>
+
+<!-- Chapter 07 -->
+<section class="chapter">
+  <div class="chapter-num">07 · Lampiran</div>
+  <h1>Glosarium &amp; Bacaan Lanjutan</h1>
+
+  <h2>A. Glosarium</h2>
+  <p><strong>Autentikasi (AuthN)</strong> — proses verifikasi identitas: membuktikan bahwa subjek adalah siapa yang diklaim.</p>
+  <p><strong>Otorisasi (AuthZ)</strong> — proses menentukan apa yang boleh dilakukan oleh identitas yang sudah terverifikasi.</p>
+  <p><strong>Bearer Token</strong> — token yang dibawa di header Authorization; siapa yang memegang token, dia dianggap pemilik sah.</p>
+  <p><strong>JWT (JSON Web Token)</strong> — format token compact dan self-contained yang ditandatangani secara kriptografis.</p>
+  <p><strong>OAuth 2.0</strong> — framework otorisasi untuk delegasi akses ke sumber daya tanpa membagikan kredensial.</p>
+  <p><strong>OpenID Connect (OIDC)</strong> — lapisan autentikasi yang dibangun di atas OAuth 2.0.</p>
+  <p><strong>SAML</strong> — Security Assertion Markup Language, standar SSO berbasis XML yang dominan di enterprise.</p>
+  <p><strong>MFA / 2FA</strong> — Multi-Factor / Two-Factor Authentication, menggabungkan dua atau lebih faktor identitas.</p>
+  <p><strong>TOTP</strong> — Time-based One-Time Password, kode 6 digit yang berubah tiap 30 detik (Google Authenticator).</p>
+  <p><strong>mTLS</strong> — Mutual TLS, autentikasi dua arah menggunakan sertifikat X.509.</p>
+  <p><strong>WebAuthn</strong> — standar W3C untuk autentikasi berbasis kriptografi kunci publik, dasar dari Passkey.</p>
+  <p><strong>Salt</strong> — nilai acak unik yang digabung dengan password sebelum hashing untuk mencegah rainbow table.</p>
+  <p><strong>CSRF</strong> — Cross-Site Request Forgery, serangan yang memanfaatkan sesi pengguna untuk aksi tak diinginkan.</p>
+  <p><strong>XSS</strong> — Cross-Site Scripting, injeksi script berbahaya ke halaman yang dilihat pengguna lain.</p>
+  <p><strong>Zero Trust</strong> — paradigma keamanan yang tidak mempercayai zona apa pun; setiap request harus diverifikasi.</p>
+
+  <h2>B. Bacaan Lanjutan</h2>
+  <ul>
+    <li><strong>OWASP Authentication Cheat Sheet</strong> — referensi praktis dari komunitas keamanan terbuka.</li>
+    <li><strong>OWASP Top 10</strong> — daftar kerentanan paling kritis di aplikasi web, diperbarui berkala.</li>
+    <li><strong>RFC 6749</strong> — spesifikasi resmi OAuth 2.0.</li>
+    <li><strong>RFC 7519</strong> — spesifikasi resmi JSON Web Token.</li>
+    <li><strong>NIST SP 800-63B</strong> — pedoman digital identity dari pemerintah AS, sumber otoritatif tentang authenticator.</li>
+    <li><strong>"Pragmatic Web Security" oleh Philippe De Ryck</strong> — kursus dan artikel mendalam.</li>
+    <li><strong>auth0.com/docs</strong> dan <strong>okta.com/identity-101</strong> — dokumentasi vendor yang sangat edukatif.</li>
+  </ul>
+
+  <h2>C. Latihan untuk Mahasiswa</h2>
+  <ol>
+    <li>Pilih satu aplikasi yang Anda pakai sehari-hari. Identifikasi: tipe autentikasi apa yang dipakai? MFA tersedia? Bagaimana Anda mengetahuinya?</li>
+    <li>Implementasikan login sederhana dengan JWT pada Node.js/Express atau Next.js. Buat endpoint <code>/login</code>, <code>/refresh</code>, dan <code>/me</code>.</li>
+    <li>Buat tabel perbandingan tiga metode autentikasi untuk skenario: "platform forum diskusi dengan 100 ribu pengguna". Argumentasikan pilihan terbaik.</li>
+    <li>Audit aplikasi web open source pilihan Anda. Cari kerentanan: apakah cookie pakai HttpOnly? Apakah ada rate limit? Pesan error login generic?</li>
+  </ol>
+
+  <h2>D. Ucapan Terima Kasih</h2>
+  <p>Modul ini disusun dari pengalaman industri dan referensi komunitas keamanan terbuka — OWASP, IETF, dan W3C. Terima kasih kepada para praktisi yang mendokumentasikan kesalahan dan pembelajaran mereka secara terbuka, sehingga generasi pengembang berikutnya tidak mengulang celah yang sama.</p>
+</section>
+
+</body>
+</html>
